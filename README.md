@@ -1,0 +1,2 @@
+# QuickCart
+E-Commerce platform
