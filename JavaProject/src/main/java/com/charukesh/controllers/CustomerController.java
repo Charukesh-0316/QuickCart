@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.charukesh.DTO.ShopResult;
+import com.charukesh.DTO.UserDTO;
 import com.charukesh.entities.Category;
 import com.charukesh.entities.Product;
 import com.charukesh.entities.User;
@@ -24,6 +25,12 @@ public class CustomerController {
 	@Autowired
 	private UserService userService;
 	
+	@PostMapping("user/register")
+	public ShopResult<?> registerUser(@RequestBody UserDTO user){
+		User registerdUser = userService.registerUser(user);
+		return ShopResult.success(registerdUser);
+		
+	}
 	
 	@GetMapping("/users")
 	public ShopResult<?> getAllUsers(){

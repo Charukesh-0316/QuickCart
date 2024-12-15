@@ -1,13 +1,17 @@
 package com.charukesh.entities;
 
 import java.io.Serializable;
+
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
 public class UserRoleId implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Column(name="user_id")
     private int userID;
+    @Column(name="role_id")
     private int roleID;
 
     // Default constructor

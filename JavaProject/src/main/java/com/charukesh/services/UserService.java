@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.charukesh.DTO.UserDTO;
 import com.charukesh.entities.Category;
 import com.charukesh.entities.Product;
 import com.charukesh.entities.User;
@@ -18,5 +19,7 @@ public interface UserService {
 	List<Category> getAllCategories();
 
 	List<Product> getAllProductByCategory(int id);
+
+	User registerUser(UserDTO user);
 
 }

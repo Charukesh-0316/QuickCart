@@ -10,5 +10,5 @@ import com.charukesh.entities.User;
 public interface UserDao extends JpaRepository<User, Integer> {
 		
 	User findByEmailAndPassword(String email,String password);
-	
+	User save(User user);
 }
