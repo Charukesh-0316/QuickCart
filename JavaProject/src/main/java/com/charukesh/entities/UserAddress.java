@@ -1,14 +1,17 @@
 package com.charukesh.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.CascadeType;
+import java.util.List;
+
 import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,23 +19,25 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "user_roles")
+@Table(name = "useraddress")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userRoleId")
-public class UserRoles {
+@ToString(exclude = {"user","address"})
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userAddressId")
 
-    @EmbeddedId
-    private UserRoleId userRoleId; //composite primary key
-
-    @ManyToOne(fetch = FetchType.LAZY)
+public class UserAddress {
+	
+	@EmbeddedId
+	private UserAddressId userAddressId;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    private User user;
+	private User user;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_id", insertable = false, updatable = false)
+	private Address address;
 
-    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", insertable = false, updatable = false)
-    private Roles role;
 }

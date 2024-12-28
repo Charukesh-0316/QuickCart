@@ -11,10 +11,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.charukesh.DTO.ReviewDTO;
 import com.charukesh.DTO.ShopResult;
+import com.charukesh.DTO.UserAddressDTO;
 import com.charukesh.DTO.UserDTO;
+import com.charukesh.DTO.UserOrdersDTO;
+import com.charukesh.entities.Address;
 import com.charukesh.entities.Category;
+import com.charukesh.entities.Order;
 import com.charukesh.entities.Product;
+import com.charukesh.entities.Review;
 import com.charukesh.entities.User;
 import com.charukesh.models.UserAuthenticate;
 import com.charukesh.services.UserService;
@@ -62,7 +68,6 @@ public class CustomerController {
 			return ShopResult.success(product_list);
 		}
 
-		
 	}
 	
 	@PostMapping("user/login")
@@ -75,5 +80,57 @@ public class CustomerController {
 			return ShopResult.error("Log In Failed");
 		
 	}
+	
+	//
+	
+	@PostMapping("/user/address")
+	public ShopResult<?> saveAddress(@RequestBody UserAddressDTO userAddressDTO){
+		Address address = userService.addAddress(userAddressDTO);
+		if(address!=null) {
+			return ShopResult.success(address);
+		}
+		return null;
+	}
+	
+	@GetMapping("/user/product/{id}")
+	public ShopResult<?> productDetails(@PathVariable("id")int id){
+		Product product = userService.getProductDetails(id);
+		if(product == null) {
+			return ShopResult.error("Product Not Found..");
+		}
+		return ShopResult.success(product);
+		
+	}
+	
+	@PostMapping("/user/order")
+	public ShopResult<?> userOrders(@RequestBody UserOrdersDTO userOrdersDTO){
+		Order order = userService.getOrder(userOrdersDTO);
+		if(order != null) {
+			return ShopResult.success(order);
+		}
+		return ShopResult.error("order not found....");
+	}
+//	@PostMapping("user/cart")
+//	public ShopResult<?> userCart(@RequestBody ){
+//		
+//	}
+	@PostMapping("/user/review")
+	public ShopResult<?> userReview(@RequestBody ReviewDTO reviewDTO){
+	 Review review= userService.addReview(reviewDTO);
+	 if(review != null) {
+		 ReviewDTO ReviewDTO = new ReviewDTO(
+				 review.getId(),
+				 review.getUser().getId(),
+				 review.getProduct().getId(),
+				 review.getReviewText()
+				 );
+		 return ShopResult.success(review);
+	 }
+		return ShopResult.error("failed to add Review");
+		
+	}
+
+	
+	
 
 }

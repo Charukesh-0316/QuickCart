@@ -16,23 +16,23 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "user_roles")
+@Table(name = "userproducts")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @ToString
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userRoleId")
-public class UserRoles {
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "vendorProductsId")
+public class VendorProducts {
 
     @EmbeddedId
-    private UserRoleId userRoleId; //composite primary key
+    private VendorProductsId vendorProductsId; //composite primary key
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
 
     @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", insertable = false, updatable = false)
-    private Roles role;
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
+    private Product product;
 }

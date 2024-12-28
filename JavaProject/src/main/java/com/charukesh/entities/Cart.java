@@ -10,13 +10,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.AllArgsConstructor;
@@ -30,22 +28,31 @@ import lombok.ToString;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString()
-@Table(name="products")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // because of serialization error
-public class Product {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
-	private String brand;
-	private String name;
-	private double price;
-	private double rating;
-	@Column(name="expiry_date")
-	private Date expiryDate;
-	
-	
-	@JsonBackReference
-	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true) 
-	private List<ProductCategories> productCategories;
+@ToString(exclude = {"user"})
+@Table(name="cart")
+public class Cart {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+//    @ManyToOne
+//    @JoinColumn(name = "userid")
+//    private User user;
+    
+    @Column(name="userid")
+    private int userId;
+
+    @Column(name="createdon")
+    private String createdOn;
+    @Column(name="totalitems")
+    private int totalItems;
+
+    @JsonIgnore
+    @JsonManagedReference
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    private List<CartItem> items;
+
+    // Getters and Setters
 }
+
+
