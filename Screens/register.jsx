@@ -20,12 +20,15 @@ function Register(props) {
     }
 
     const userDetails = {
-      first_name,
+      user : {
+        first_name,
       last_name,
       email,
       phone,
       password,
       shop_name: isVendor ? shopName : null,
+      },
+      role_Id: isVendor ? 3 : 2
     };
 
     axios

@@ -5,36 +5,27 @@ import { Button, TextInput } from "react-native-paper";
 
 function Login(props) {
 
-
     const [credential, setCredential] = useState({ email: "", password: "" });
 
-    
     const RegisterHere = () => {
         props.navigation.navigate("go-register");
     };
 
-    
     const SignIn = () => {
-
-    
-
+        console.log("SignIn Clicked")
         axios
       .post("http://localhost:8080/user/login", credential)
       .then((response) => {
-        console.log("response"+response)
-        if(response.data.status=='success'){
+        console.log(response.data.data)
+        if(response.data.status==='success'){
         alert("Success", response.data.success);
-        props.navigation.navigate("go-showbooks");
-        }
-        else{
-
+        props.navigation.navigate("go-category");
         }
       })
       .catch((error) => {
         console.error(error);
         alert("Error", "Failed to register user");
       });
-    
     };
 
     return (
@@ -45,8 +36,7 @@ function Login(props) {
                 justifyContent: "center",
                 alignItems: "center",
                 padding: 20,
-            }}
-        >
+            }}>
            
             <TextInput
                 label="Enter your email"
@@ -56,7 +46,6 @@ function Login(props) {
                 onChangeText={(value) => setCredential({ ...credential, email: value })}
             />
 
-           
             <TextInput
                 label="Enter your password"
                 mode="outlined"
@@ -66,7 +55,6 @@ function Login(props) {
                 onChangeText={(value) => setCredential({ ...credential, password: value })}
             />
 
-         
             <Button mode="contained" onPress={SignIn} style={{ marginBottom: 10 }}>
                 Login
             </Button>
