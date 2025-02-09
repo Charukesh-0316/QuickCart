@@ -1,7 +1,10 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useState } from "react";
 import { View } from "react-native";
 import { Button, TextInput } from "react-native-paper";
+import Toast from "react-native-toast-message";
+import config from "../config";
 
 function Login(props) {
 
@@ -14,19 +17,47 @@ function Login(props) {
     const SignIn = () => {
         console.log("SignIn Clicked")
         axios
-      .post("http://localhost:8080/user/login", credential)
-      .then((response) => {
+      .post(`${config.URL}/user/login`, credential)
+      .then(async(response) => {
         console.log(response.data.data)
         if(response.data.status==='success'){
-        alert("Success", response.data.success);
-        props.navigation.navigate("go-category");
+        // alert("Success", response.data.success);
+        Toast.show({
+            type: "success",
+            text1: "LogIn Successful",
+        })
+        await AsyncStorage.setItem('userId', response.data.data.id.toString());
+        const userId = await AsyncStorage.getItem('userId');
+        debugger;
+        if (userId !== null) {
+            navigate(userId);
+        }
+        }else{
+            Toast.show({
+                type: "error",
+                text1: "Failed please check username and password",
+            })
         }
       })
       .catch((error) => {
         console.error(error);
-        alert("Error", "Failed to register user");
+        // alert("Error", "Failed to register user");
       });
     };
+
+    const navigate = (id) =>{
+        debugger;
+        axios.get(`${config.URL}/vendor/login/${id}`)
+        .then((result)=>{
+            console.log(result.data)
+            debugger;
+            if(result.data.data === "Customer"){
+                props.navigation.navigate("go-category");
+            }else if(result.data.data === "Vendor"){
+                props.navigation.navigate("go-vendorCategories");
+            }
+        })
+    }
 
     return (
         <View
