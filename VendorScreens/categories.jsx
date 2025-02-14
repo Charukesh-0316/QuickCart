@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Alert, StyleSheet, ScrollView, Animated } from "react-native";
-
+import config from "../config";
 function VendorCategory({ navigation }) {
   const [categories, setCategories] = useState([]);
   const [scaleValue] = useState(new Animated.Value(1)); // For hover effect
@@ -14,8 +14,8 @@ function VendorCategory({ navigation }) {
         Alert.alert("Error", "User ID not found");
         return;
       }
-
-      const response = await axios.get(`http://localhost:8080/vendor/store/user/${userId}`);
+      debugger;
+      const response = await axios.get(`${config.URL}/vendor/store/user/${userId}`);
       if (response.data.status === "success") {
         await AsyncStorage.setItem("storeId", response.data.data.id.toString());
       }
@@ -28,7 +28,7 @@ function VendorCategory({ navigation }) {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/user/categories");
+        const response = await axios.get(`${config.URL}/user/categories`);
         if (response.data.status === "success") {
           setCategories(response.data.data);
         }

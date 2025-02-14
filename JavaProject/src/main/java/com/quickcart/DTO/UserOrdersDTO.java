@@ -2,6 +2,8 @@
 package com.quickcart.DTO;
 
 
+import java.util.List;
+
 import com.quickcart.entities.Order;
 
 import lombok.AllArgsConstructor;
@@ -17,7 +19,8 @@ import lombok.ToString;
 public class UserOrdersDTO {
     private int userId;
     private int addressId;
-    private int productId;
+    private List<Integer> productId;
     private int quantity;
+    private double currentPrice;
     private Order order;
    }

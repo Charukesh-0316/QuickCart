@@ -1,8 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView, Text } from "react-native";
 import { Card, Title, Paragraph, Button, ActivityIndicator } from "react-native-paper";
+import config from "../config";
 
 function ProductStock(props) {
     const [storeId, setStoreId] = useState(null);
@@ -15,26 +16,27 @@ function ProductStock(props) {
     const productId = props.route.params.pid;
 
     useEffect(() => {
-        debugger
         const fetchStoreId = async () => {
-                const id = await AsyncStorage.getItem('storeId');
-                setStoreId(id);
-                const payload = {
-                    storeId:id,
-                    productId:productId
-                }
-                axios.post("http://localhost:8080/vendor/get_stock",payload)
-                .then((result)=>{
+            const id = await AsyncStorage.getItem('storeId');
+            setStoreId(id);
+            const payload = {
+                storeId: id,
+                productId: productId
+            };
+            axios.post(`${config.URL}/vendor/get_stock`, payload)
+                .then((result) => {
                     if (result.data.status === 'success') {
-                        debugger;
                         setProductStock(result.data.data);
                     }
                 })
+                .catch((error) => {
+                    console.error("Error fetching stock:", error);
+                });
         };
 
         const getProduct = async () => {
             try {
-                const result = await axios.get(`http://localhost:8080/user/product/${productId}`);
+                const result = await axios.get(`${config.URL}/user/product/${productId}`);
                 setProduct(result.data.data);
             } catch (error) {
                 console.error('Error fetching product:', error);
@@ -53,15 +55,18 @@ function ProductStock(props) {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <h1>Product Stock Details</h1>
+            <Text style={styles.title}>Product Stock Details</Text>
             <Card style={styles.card}>
                 <Card.Content>
-                    
-                    <Title>{product.name}</Title>
-                        <Paragraph>Brand: {product.brand}</Paragraph>
-                        <Paragraph>Price: ₹ {product.price}</Paragraph>
-                        <Paragraph>Rating: {product.rating} ⭐</Paragraph>
-                        <Paragraph>Stock: {productStock.stock} {productStock.available ? "(Available)" : "(Out of stock)"}</Paragraph>
+                    {product && (
+                        <>
+                            <Title>{product.name}</Title>
+                            <Paragraph>Brand: {product.brand}</Paragraph>
+                            <Paragraph>Price: ₹ {product.price}</Paragraph>
+                            <Paragraph>Rating: {product.rating} ⭐</Paragraph>
+                            <Paragraph>Stock: {productStock.stock} {productStock.available ? "(Available)" : "(Out of stock)"}</Paragraph>
+                        </>
+                    )}
                 </Card.Content>
             </Card>
         </ScrollView>
@@ -72,6 +77,12 @@ const styles = StyleSheet.create({
     container: {
         padding: 16,
         backgroundColor: "#f4f4f4"
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center'
     },
     card: {
         marginBottom: 16,

@@ -1,8 +1,11 @@
 package com.quickcart.services;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +17,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quickcart.DTO.ProductDTO;
 import com.quickcart.DTO.ProductStockDTO;
 import com.quickcart.DTO.VendorStoreDTO;
@@ -40,7 +46,10 @@ import com.quickcart.entities.StoreProductsId;
 import com.quickcart.entities.User;
 import com.quickcart.entities.VendorProducts;
 import com.quickcart.entities.VendorProductsId;
+import com.quickcart.models.ImageDTO;
 import com.quickcart.models.ProductCategoryModel;
+import com.quickcart.models.ProductEditUploadDTO;
+import com.quickcart.models.ProductUploadDTO;
 import com.quickcart.models.StockIsAvailaibleModel;
 
 @Service
@@ -129,29 +138,12 @@ public class VendorServiceImpl implements VendorService{
 		 }
 		 return null;
 	}
-
-//	@Override
-//	public Product updateProduct(int id, Product product) {
-//		Optional<Product> exists = productDao.findById(id);
-//		if(exists.isPresent()) {
-//			Product p = exists.get();
-//			p.setId(id);
-//			p.setName(product.getName());
-//			p.setBrand(product.getBrand());
-//			p.setPrice(product.getPrice());
-//			p.setRating(product.getRating());
-//			p.setExpiryDate(product.getExpiryDate());
-//			productDao.save(p);
-//			return p;
-//		}
-//		return null;
-//	}
 	
 	@Value("${images.path}")
     private String imageFolderPath;
 	
 	@Override
-	public Product updateProduct(int id, Product product, MultipartFile productImage) throws IOException {
+	public Product updateProduct(int id, Product product, String productImage) throws IOException {
 	    Optional<Product> exists = productDao.findById(id);
 	    if (exists.isPresent()) {
 	        Product p = exists.get();
@@ -161,14 +153,7 @@ public class VendorServiceImpl implements VendorService{
 	        p.setPrice(product.getPrice());
 	        p.setRating(product.getRating());
 	        p.setExpiryDate(product.getExpiryDate());
-
-	        if (productImage != null && !productImage.isEmpty()) {
-	            String fileName = productImage.getOriginalFilename();
-	            File outFile = new File(imageFolderPath + fileName);
-	            productImage.transferTo(outFile);
-	            p.setProductImage(fileName);
-	        }
-
+	        p.setProductImage(productImage);
 	        productDao.save(p);
 	        return p;
 	    }
@@ -265,9 +250,9 @@ public class VendorServiceImpl implements VendorService{
 	}
 
 	@Override
-	public Review getReviewOfProduct(int id) {
-		Review review = reviewDao.findByProductId(id);
-		return review;
+	public List<Review> getReviewsOfProduct(int id) {
+		List<Review> reviews = reviewDao.findByProductId(id);
+		return reviews;
 	}
 
 	@Override
@@ -302,17 +287,88 @@ public class VendorServiceImpl implements VendorService{
         return products;
     }
 
-//	@Override
-//	public List<Product> getProductsByCategoryId(int id) {
-//		 List<Product> list = productCategoryDao.findProductsByCategoryId(id);
-//		return list;
-//	}
-//	
 	@Override
 	public Store getStoreByUserId(int id) {
 		 List<Store> store = storeDao.findStoresByUserId(id);
 		 System.out.println(store + "service");
 		return store.get(0);
+	}
+
+	@Override
+	public List<Product> getProductsByCategoryIdAndVendorId(int cid, int vid) {
+		
+		return null;
+	}
+	
+	public static void saveBase64Image(String base64ImageString, File outputFile) throws Exception {
+		// Remove data URI prefix if present (e.g., "data:image/jpeg;base64,")
+		if (base64ImageString.contains(",")) {
+			base64ImageString = base64ImageString.split(",")[1];
+		}
+
+		// Decode the Base64 string
+		byte[] imageBytes = Base64.getDecoder().decode(base64ImageString);
+
+		// Write the bytes to the specified file
+		try (OutputStream outputStream = new FileOutputStream(outputFile)) {
+			outputStream.write(imageBytes);
+		}
+	}
+	
+	@Override
+	public ProductDTO addProduct(ProductUploadDTO p) throws Throwable, Throwable {
+		// Convert JSON string to Product object
+		ObjectMapper objectMapper = new ObjectMapper();
+		Product product = objectMapper.readValue(p.getProductJson(), Product.class);
+//	    Product product = new Product();
+
+//	     Save the image file
+		String imageJson = p.getProductImage();
+		ImageDTO imageDto = objectMapper.readValue(imageJson, ImageDTO.class);
+
+		File outFile = new File(imageFolderPath + imageDto.getName());
+		System.out.println("file with path :" + imageFolderPath + imageDto.getName());
+		// p.getProductImage().transferTo(outFile);
+		saveBase64Image(imageDto.getUri(), outFile);
+
+		product.setProductImage(imageDto.getName()); // Save the file name in the product entity
+		System.out.println("add product => " + product);
+		System.out.println("add productImage => " + product.getProductImage());
+
+		// Create ProductDTO
+		ProductDTO productDTO = new ProductDTO();
+		productDTO.setProduct(product);
+		productDTO.setCategory_Id(Integer.parseInt(p.getCategoryId()));
+		productDTO.setVendor_Id(Integer.parseInt(p.getVendorId()));
+//	    productDTO.setProductImage(p.getProductImage());
+
+		// Save the product
+		
+		return productDTO;
+	}
+	
+	@Override
+	public Product editProduct(int id, ProductEditUploadDTO editUploadDTO) throws Throwable {
+		ObjectMapper objectMapper = new ObjectMapper();
+		Product product = objectMapper.readValue(editUploadDTO.getProductJson(), Product.class);
+
+//	    Save the image file
+		String imageJson = editUploadDTO.getProductImage();
+		System.out.println("imageJson" + imageJson);
+
+		ImageDTO imageDto = objectMapper.readValue(imageJson, ImageDTO.class);
+		System.out.println("imageDTO" + imageDto);
+
+		File outFile = new File(imageFolderPath + imageDto.getName());
+		System.out.println("file with path :" + imageFolderPath + imageDto.getName());
+		// p.getProductImage().transferTo(outFile);
+		saveBase64Image(imageDto.getUri(), outFile);
+
+		product.setProductImage(imageDto.getName()); // Save the file name in the product entity
+
+		Product updatedProduct = updateProduct(id, product, imageDto.getName());
+
+		return updatedProduct;
 	}
 
 }

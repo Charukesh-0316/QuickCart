@@ -40,7 +40,6 @@ public class CartServiceImpl implements CartServices{
 	@Autowired
 	private UserDao userDao;
 
-
 	@Override
 	public Cart addCart(Cart cart) {
 	 	Cart savedCart = cartDao.save(cart);
@@ -50,7 +49,11 @@ public class CartServiceImpl implements CartServices{
 	@Override
 	public Cart getCartById(int cartId) {
 		Optional<Cart> cart= cartDao.findById(cartId);
-		return cart.get();
+		if(cart.isPresent()) {
+			Cart c = cart.get();
+			return c;
+		}
+		return null;
 	}
 
 	@Override
@@ -64,15 +67,20 @@ public class CartServiceImpl implements CartServices{
 	}
 
 	@Override
+	public List<CartItem> getProductsByCartId(int id) {
+		 List<CartItem> products = cartItemDao.findProductByCartId(id);
+			return products;
+	}
+
+	@Override
 	public Cart getCartByUserId(int id) {
-	 Cart cart = cartDao.findByUserId(id);
-	 System.out.println(cart.toString());
-		return cart;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public List<CartItem> getCartItemsByCartId(int id) {
-		List<CartItem> items = cartItemDao.findByCartId(id);
-		return items;
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

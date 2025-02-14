@@ -1,5 +1,6 @@
 package com.quickcart.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -160,29 +161,29 @@ public class UserServiceImpl implements UserService {
 		return product;
 	}
 
-	@Override
-	@Transactional
-	public Order getOrder(UserOrdersDTO userOrdersDTO) {
-	    Order order = userOrdersDTO.getOrder();
-	    Order savedOrder = orderDao.save(order);
-
-	    OrderItemId orderItemId = new OrderItemId(savedOrder.getId(), userOrdersDTO.getProductId());
-
-	    Optional<User> optionalUser = userDao.findById(userOrdersDTO.getUserId());
-	    if (optionalUser.isPresent()) {
-	        User user = optionalUser.get();
-
-	        OrderItem orderItem = new OrderItem();
-	        orderItem.setOrderItemId(orderItemId);
-	        orderItem.setOrder(savedOrder);
-	        orderItem.setProduct(productDao.findById(userOrdersDTO.getProductId()).orElse(null));
-	        orderItem.setQuantity(userOrdersDTO.getQuantity());
-	        orderItemDao.save(orderItem);
-
-	        return savedOrder;
-	    }
-	    return null;
-	}
+//	@Override
+//	@Transactional
+//	public Order getOrder(UserOrdersDTO userOrdersDTO) {
+//	    Order order = userOrdersDTO.getOrder();
+//	    Order savedOrder = orderDao.save(order);
+//
+//	    OrderItemId orderItemId = new OrderItemId(savedOrder.getId(), userOrdersDTO.getProductId());
+//
+//	    Optional<User> optionalUser = userDao.findById(userOrdersDTO.getUserId());
+//	    if (optionalUser.isPresent()) {
+//	        User user = optionalUser.get();
+//
+//	        OrderItem orderItem = new OrderItem();
+//	        orderItem.setOrderItemId(orderItemId);
+//	        orderItem.setOrder(savedOrder);
+//	        orderItem.setProduct(productDao.findById(userOrdersDTO.getProductId()).orElse(null));
+//	        orderItem.setQuantity(userOrdersDTO.getQuantity());
+//	        orderItemDao.save(orderItem);
+//
+//	        return savedOrder;
+//	    }
+//	    return null;
+//	}
 
 	@Override
 	public Product getProductById(int id) {
@@ -216,6 +217,57 @@ public class UserServiceImpl implements UserService {
 		review = reviewDao.save(review);
 		
 		return review;
+	}
+
+	@Override
+	public List<Address> getAddressByUserId(int id) {
+		List<UserAddress> listAd = userAddressDao.findAddressByUserId(id);
+		if(!listAd.isEmpty()) {
+			List<Address> aList = new ArrayList<Address>();
+			for (UserAddress a : listAd) {
+				aList.add(a.getAddress());
+			}
+			return aList;
+		}
+		return null;
+	}
+
+	@Override
+	@Transactional
+	public Order getOrder(UserOrdersDTO userOrdersDTO) {
+	    // Fetch User
+	    User user = userDao.findById(userOrdersDTO.getUserId())
+	            .orElseThrow(() -> new RuntimeException("User not found"));
+
+	    // Fetch Address
+	    Address address = addressDao.findById(userOrdersDTO.getAddressId())
+	            .orElseThrow(() -> new RuntimeException("Address not found"));
+
+	    // Create Order
+	    Order order = userOrdersDTO.getOrder();
+	    order.setUser(user);
+	    order.setAddress(address);
+
+	    // Save Order
+	    Order savedOrder = orderDao.save(order);
+
+	    // Process each product in the list
+	    for (Integer productId : userOrdersDTO.getProductId()) {
+	        Product product = productDao.findById(productId)
+	                .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
+
+	        OrderItem orderItem = new OrderItem();
+	        OrderItemId orderItemId = new OrderItemId(savedOrder.getId(), productId);
+	        orderItem.setOrderItemId(orderItemId);
+	        orderItem.setOrder(savedOrder);
+	        orderItem.setProduct(product);
+	        orderItem.setQuantity(userOrdersDTO.getQuantity());  // Might need to handle different quantities per product
+	        orderItem.setCurrentPrice(userOrdersDTO.getCurrentPrice()); // Ensure price is handled correctly
+
+	        orderItemDao.save(orderItem);
+	    }
+
+	    return savedOrder;
 	}
 
 

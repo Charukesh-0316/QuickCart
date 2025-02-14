@@ -1,44 +1,66 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+import { View, FlatList, Text, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import axios from 'axios';
+import config from '../config';
 
-function Category(props) {
+function CategoriesScreen(props) {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const [categories,setCategories] = useState([{
-        id:0,
-        name:''
-    }])
+  useEffect(() => {
+    axios
+      .get(`${config.URL}/user/categories`)
+      .then((response) => {
+        debugger;
+        if (response.data.status === 'success') {
+          setCategories(response.data.data);
+        } else {
+          alert('Failed to fetch categories');
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        alert('Error fetching categories');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
-    useEffect(()=>{
-        axios.get("http://localhost:8080/user/categories")
-        .then((response) => {
-          console.log(response.data.data)
-          setCategories(response.data.data)
-        })
-        .catch((error) => {
-          console.error(error);
-          alert("Error", "Failed to register user");
-        });   
-    },[]);
+  return (
+    <ScrollView style={{ flex: 1, padding: 20 }}>
+        
 
-    const categoryClicked = (id) =>{
-        console.log(id)
-        props.navigation.navigate("go-products",{id:id});
-    }
-
-      return (
-        <div>
-          {categories.map((result)=>{
-            return(
-            <div key={result.id} onClick={() => categoryClicked(result.id)}
-            style={{ cursor: "pointer", padding: "10px", border: "1px solid #ddd", marginBottom: "10px" }}
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          {categories.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              onPress={() => props.navigation.navigate('go-products', { categoryId: item.id })}
+              style={{
+                width: '48%',
+                padding: 20,
+                borderWidth: 1,
+                borderColor: '#ddd',
+                borderRadius: 8,
+                backgroundColor: '#f9f9f9',
+                alignItems: 'center',
+                marginBottom: 15,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                elevation: 4,
+              }}
             >
-                <h1>{result.name}</h1>
-            </div>
-            );
-          })}
-        </div>
-      );
-      
+              <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#333' }}>{item.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+    </ScrollView>
+  );
 }
 
-export default Category;
+export default CategoriesScreen;

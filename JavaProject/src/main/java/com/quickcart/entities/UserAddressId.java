@@ -24,6 +24,6 @@ import lombok.ToString;
 public class UserAddressId implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-    private int user_Id;
-    private int address_Id;
+    private int userid;
+    private int addressid;
 }

@@ -3,6 +3,7 @@ import { View, Text, Image, Button, ScrollView, StyleSheet, TouchableOpacity } f
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
+import config from "../config";
 
 const CategoryProducts = (props) => {
     const categoryId = props.route.params.id;
@@ -10,7 +11,7 @@ const CategoryProducts = (props) => {
 
     useEffect(() => {
         const productList = () => {
-            axios.get(`http://localhost:8080/vendor/products/category/${categoryId}`)
+            axios.get(`${config.URL}/vendor/products/category/${categoryId}`)
                 .then((result) => {
                     if (result.data.status === 'success') {
                         setProducts(result.data.data);
@@ -28,7 +29,7 @@ const CategoryProducts = (props) => {
         const storeId = await AsyncStorage.getItem('storeId');
         axios({
             method: 'delete',
-            url: 'http://localhost:8080/vendor/deleteProduct',
+            url: `${config.URL}/vendor/deleteProduct`,
             data: { vendorId: userId, productId: id, categoryId: categoryId, storeId: storeId },
             headers: {
                 'Content-Type': 'application/json'

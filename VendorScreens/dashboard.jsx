@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, Button, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Image, Button, ScrollView, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
+import config from "../config";
 
 const Dashboard = (props) => {
     const [products, setProducts] = useState([]);
@@ -10,50 +11,22 @@ const Dashboard = (props) => {
     useEffect(() => {
         const getProducts = async () => {
             const userId = await AsyncStorage.getItem('userId');
-            axios.get(`http://localhost:8080/vendor/get_products/${userId}`)
+            axios.get(`${config.URL}/vendor/get_products/${userId}`)
                 .then((result) => {
                     if (result.data.status === 'success') {
                         setProducts(result.data.data);
                     }
                 })
                 .catch((error) => {
-                    console.error("Error fetching products:", error);
+                    Alert.alert("No Products", "No products added yet. Please add a product.");
                 });
         };
         getProducts();
     }, []);
 
     const productReviews = async (id) => {
-        const userId = await AsyncStorage.getItem('userId');
-        axios({
-            method: 'delete',
-            url: 'http://localhost:8080/vendor/deleteProduct',
-            data: { vendorId: userId, productId: id },
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then((reply) => {
-            if (reply.data.status === 'success') {
-                setProducts(products.filter(product => product.id !== id));
-                Toast.show({
-                    type: 'success',
-                    text1: 'Product deleted successfully',
-                });
-            } else {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Failed to delete product',
-                });
-            }
-        })
-        .catch((error) => {
-            console.error("Error deleting product:", error);
-            Toast.show({
-                type: 'error',
-                text1: 'Network error, please try again',
-            });
-        });
+        props.navigation.navigate('go-productReview', { pid: id });
+        
     };
 
     const getStock = (id) => {

@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Text } from 'react-native';
 import Toast from 'react-native-toast-message';
+import config from "../config";
 
 function AddAddress(props) {
     const [address, setAddress] = useState({
@@ -21,7 +22,7 @@ function AddAddress(props) {
 
     const handleSubmit = () => {
         console.log('Address Submitted: ', address);
-        axios.post("http://localhost:8080/vendor/address",address)
+        axios.post(`${config.URL}/vendor/address`,address)
         .then((result)=>{
             debugger;
             if(result.data.status === 'success'){

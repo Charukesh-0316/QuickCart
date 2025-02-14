@@ -18,19 +18,42 @@ import com.quickcart.DTO.CartItemDTO;
 import com.quickcart.DTO.ShopResult;
 import com.quickcart.entities.Cart;
 import com.quickcart.entities.CartItem;
+import com.quickcart.entities.Product;
 import com.quickcart.services.CartServices;
 import com.quickcart.services.UserService;
 
-@RestController
 @CrossOrigin
+@RestController
 public class CartController {
-	
 	@Autowired
 	private CartServices cartServices;
-	
 	@Autowired
 	private UserService userservice;
+	
+	@GetMapping("/user/cart/{id}")
+	public ShopResult<?> getCart(@PathVariable("id") int id){
+		 Cart cart = cartServices.getCartById(id);
+		if(cart!=null) {
+			return ShopResult.success(cart);
+		}
+		return ShopResult.error(null);
+	}
+	
+	
+	@GetMapping("/cart/products/{id}")
+	public ShopResult<?> getCartProducts(@PathVariable("id") int id) {
+	    System.out.println("cartServices called: " + id);
+	    List<CartItem> productList = cartServices.getProductsByCartId(id);
+	    System.out.println("productList: " + productList);
 
+	    if (productList != null && !productList.isEmpty()) {
+	        return ShopResult.success(productList);
+	    }
+	    return ShopResult.error("No products found for the given cart ID");
+	}
+
+	
+	
 	@PostMapping("/user/cart")
 	public ShopResult<?> createCart(@RequestBody Cart cart ){
 		Cart savedCart=cartServices.addCart(cart);
@@ -45,30 +68,35 @@ public class CartController {
 		if(item!=null)
 			return ShopResult.success(item);
 		return ShopResult.error(null);
+	  
+
 	}
-	
 	@DeleteMapping("/{cardId}/items/{productId}")
 	public ShopResult<Cart> removeItemToCart(@PathVariable int cartId,@PathVariable int productId){
 		boolean itemRemoved = false;
 		Cart cart = cartServices.getCartById(cartId);
+
 		 Iterator<CartItem> iterator =cart.getItems().iterator();
+		 
 		 while(iterator.hasNext()) {
 			 CartItem cartItem = iterator.next();
 			 if(cartItem.getProduct().getId() == productId) {
 				 iterator.remove();
+				 
 				 cart.setTotalItems(cart.getTotalItems() - cartItem.getQuantity());
 				 itemRemoved = true;
 				 break;
 			 }
 		 }
+		 
 		 Cart updatedCart = cartServices.addCart(cart);
+		 
 		return ShopResult.success(updatedCart);
 	}
-	
-	
 	@PutMapping("/{cartId}/items/{productId}")
 	public ShopResult<Cart> updateItemToCart(@RequestBody CartItemDTO cartIdDto){
 		 Cart cart = cartServices.getCartById(cartIdDto.getCartId());
+		 
 		 boolean itemUpdated = false;
 		 for(CartItem cartItem : cart.getItems()) {
 			 if(cartItem.getProduct().getId()== cartIdDto.getProductId()) {
@@ -78,28 +106,8 @@ public class CartController {
 			 }
 		 }
 		 Cart updatedCart = cartServices.addCart(cart);
+		 
 		return ShopResult.success(updatedCart);
 	}
-	
-	
-	//get cart items by user id
-	
-	@GetMapping("/cart/{user_id}")
-	public ShopResult<?> getCartByUserId(@PathVariable("user_id") int id){
-		System.out.println(id);
-		Cart cart = cartServices.getCartByUserId(id);
-		if(cart!=null)
-			return ShopResult.success(cart);
-		return ShopResult.error(null);
-	}
-	
-	@GetMapping("/cartItems/{id}")
-	public ShopResult<?> getCartItemsByCartID(@PathVariable("id")int id){
-		 List<CartItem> itemList = cartServices.getCartItemsByCartId(id);
-		 if(!itemList.isEmpty())
-			 return ShopResult.success(itemList);
-		 return ShopResult.error(null);
-	}
-	
 
 }

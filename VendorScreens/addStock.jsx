@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { TextInput, Button, Card, Title, Paragraph, Switch, Text } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import config from "../config";
 
 function AddStock(props) {
   const productId = props.route.params.pid;
@@ -35,7 +36,7 @@ function AddStock(props) {
   }, [productId]);
 
   const handleAddStock = () => {
-    axios.post("http://localhost:8080/vendor/add_stock", stock)
+    axios.post(`${config.URL}/vendor/add_stock`, stock)
       .then((result) => {
         if (result.data.status === 'success') {
           setMessage('Stock added successfully!');

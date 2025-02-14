@@ -1,7 +1,7 @@
 package com.quickcart.entities;
 
 import java.io.Serializable;
-
+import java.util.List;
 import java.util.Objects;
 
 import javax.persistence.Embeddable;

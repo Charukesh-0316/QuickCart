@@ -33,11 +33,11 @@ public class UserAddress {
 	private UserAddressId userAddressId;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JoinColumn(name = "userid", insertable = false, updatable = false)
 	private User user;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "address_id", insertable = false, updatable = false)
+    @JoinColumn(name = "addressid", insertable = false, updatable = false)
 	private Address address;
 
 }

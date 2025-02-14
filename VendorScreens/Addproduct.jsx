@@ -1,113 +1,282 @@
-import axios from 'axios';
-import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useEffect, useState } from 'react';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  Button, 
+  StyleSheet, 
+  Image, 
+  TouchableOpacity, 
+  PermissionsAndroid, 
+  Platform,
+  Alert 
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Text } from 'react-native-paper';
+import axios from 'axios';
 import Toast from 'react-native-toast-message';
+import { launchImageLibrary } from 'react-native-image-picker';
+import config from '../config';
 
 function AddProduct(props) {
-    const [product, setProduct] = useState({
-        id: 0,
-        brand: "",
-        name: "",
-        price: '',
-        rating: '',
-        expiryDate: ''
+
+  // Request appropriate storage/media permission on Android
+  async function requestStoragePermission() {
+    if (Platform.OS === 'android') {
+      try {
+        // For Android 13 and above, request READ_MEDIA_IMAGES
+        if (Platform.Version >= 33) {
+          const result = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+            {
+              title: "Media Permission Needed",
+              message: "This app needs access to your media to select images.",
+              buttonNeutral: "Ask Me Later",
+              buttonNegative: "Cancel",
+              buttonPositive: "OK",
+            }
+          );
+          if (result !== PermissionsAndroid.RESULTS.GRANTED) {
+            console.log("Media permission denied");
+            return false;
+          } else {
+            console.log("Media permission granted");
+            return true;
+          }
+        } else {
+          // For Android versions below 13, request READ_EXTERNAL_STORAGE
+          const result = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+            {
+              title: "Storage Permission Needed",
+              message: "This app needs access to your storage to select images.",
+              buttonNeutral: "Ask Me Later",
+              buttonNegative: "Cancel",
+              buttonPositive: "OK",
+            }
+          );
+          if (result !== PermissionsAndroid.RESULTS.GRANTED) {
+            console.log("Storage permission denied");
+            return false;
+          } else {
+            console.log("Storage permission granted");
+            return true;
+          }
+        }
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    }
+    return true; // iOS or other platforms
+  }
+
+  // Request permission on component mount
+  useEffect(() => {
+    requestStoragePermission();
+  }, []);
+
+  const [product, setProduct] = useState({
+    id: 0,
+    brand: "",
+    name: "",
+    price: '',
+    rating: '',
+    expiryDate: '',
+    productImage: null,
+  });
+
+  const handleInputChange = (name, value) => {
+    setProduct({ ...product, [name]: value });
+  };
+
+  const pickImage = async () => {
+    // Check permission first
+    let permissionGranted = false;
+    if (Platform.OS === 'android') {
+      if (Platform.Version >= 33) {
+        permissionGranted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES);
+      } else {
+        permissionGranted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+      }
+      if (!permissionGranted) {
+        permissionGranted = await requestStoragePermission();
+        if (!permissionGranted) {
+          Alert.alert("Permission required", "Storage permission is required to select an image.");
+          return;
+        }
+      }
+    }
+  
+    console.log("Launching image library...");
+    const options = {
+      mediaType: "photo",
+    };
+  
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel) {
+        console.log("User cancelled image picker");
+      } else if (response.error) {
+        console.log("Image Picker Error: ", response.error);
+      } else if (response.assets && response.assets.length > 0) {
+        const selectedImage = response.assets[0];
+        
+        // Extract file extension and type
+        let extension = selectedImage.fileName ? selectedImage.fileName.split('.').pop().toLowerCase() : 'jpg';
+        let type = selectedImage.type || `image/${extension}`;
+  
+        // Use Date.now() to generate a unique name for each image
+        setProduct((prev) => ({
+          ...prev,
+          productImage: {
+            uri: selectedImage.uri,
+            type: type,
+            name: selectedImage.fileName || `image_${Date.now()}.${extension}`
+          },
+        }));
+      } else {
+        console.log("No assets returned from image picker");
+      }
     });
-    const [categoryId, setCategoryId] = useState(0);
-    const [vendorId, setVendorId] = useState(0);
+  };
+  
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setProduct({ ...product, [name]: value });
-    };
+  const handleAddProduct = async () => {
+    debugger;
+    try {
+      const userId = await AsyncStorage.getItem("userId");
+      const categoryId = props.route.params.id;
 
-    const handleAddProduct = async() => {
-        debugger;
-        const userId = await AsyncStorage.getItem('userId');
-        console.log(userId + " " + props.route.params.id)
-        const productData = {
-            product: { ...product },
-            category_Id: props.route.params.id,
-            vendor_Id: userId
-        };
+      if (!userId) {
+        alert("User ID not found. Please log in again.");
+        return;
+      }
 
-        axios.post("http://localhost:8080/vendor/add_product", productData, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
+      if (!categoryId) {
+        alert("Category ID is missing.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("productJson", JSON.stringify({
+        id: product.id,
+        brand: product.brand,
+        name: product.name,
+        price: product.price,
+        rating: product.rating,
+        expiryDate: product.expiryDate,
+      }));
+      formData.append("categoryId", categoryId);
+      formData.append("vendorId", userId);
+
+      if (product.productImage) {
+
+        formData.append("productImage", JSON.stringify({
+            uri: product.productImage.uri,
+      type: product.productImage.type,
+      name: product.productImage.fileName || product.productImage.name,
         })
-        .then((result) => {
-            if (result.data.status === "success") {
-                // alert("Product Added Successfully");
-                Toast.show({
-                    type : 'success',
-                    text1 : "Product Added Successfully"
-                })
-                props.navigation.navigate('go-addStock',{pid:result.data.data.id});
-            } else {
-                alert("Failed to Add Product");
-            }
-        })
-        .catch((error) => {
-            console.error("Error adding product: ", error);
-        });
-    };
-
-    return (
-        <div className="container mt-5">
-            <h1 className="mb-4">Vendor Products</h1>
-            <div className="mb-3">
-                <input
-                    type="text"
-                    name="brand"
-                    value={product.brand}
-                    onChange={handleInputChange}
-                    placeholder="Enter product brand"
-                    className="form-control mb-3"
-                />
-                <input
-                    type="text"
-                    name="name"
-                    value={product.name}
-                    onChange={handleInputChange}
-                    placeholder="Enter product name"
-                    className="form-control mb-3"
-                />
-                <input
-                    type="number"
-                    name="price"
-                    value={product.price}
-                    onChange={handleInputChange}
-                    placeholder="Enter product price"
-                    className="form-control mb-3"
-                />
-                <input
-                    type="number"
-                    name="rating"
-                    value={product.rating}
-                    onChange={handleInputChange}
-                    placeholder="Enter product rating"
-                    className="form-control mb-3"
-                />
-               {/* <label htmlFor="expiryDate" className="form-label">Enter expiry date</label>
-                <input
-                    type="date"
-                    name="expiryDate"
-                    value={product.expiryDate}
-                    onChange={handleInputChange}
-                    className="form-control mb-3"
-                    id="expiryDate"
-                /> */}
-                <button
-                    onClick={handleAddProduct}
-                    className="btn btn-primary"
-                >
-                    Add Product
-                </button>
-            </div>
-        </div>
     );
+      }
+
+      console.log("Category ID:", categoryId);
+      console.log("Vendor ID:", userId);
+      console.log("Product Image:", product.productImage);
+      console.log("FormData before sending:", formData);
+
+      const response = await axios.post(`${config.URL}/vendor/add_product`, formData);
+      console.log("Response:", response.data);
+
+      if (response.data.status === "success") {
+        Toast.show({
+          type: "success",
+          text1: "Product Added Successfully",
+        });
+        props.navigation.navigate("go-addStock", { pid: response.data.data.id });
+      } else {
+        alert("Failed to Add Product");
+      }
+    } catch (error) {
+      console.error("Error adding product: ", error.response ? error.response.data : error.message);
+      alert("An error occurred while adding the product.");
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Vendor Products</Text>
+      <TextInput
+        placeholder="Enter product brand"
+        value={product.brand}
+        onChangeText={(value) => handleInputChange('brand', value)}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Enter product name"
+        value={product.name}
+        onChangeText={(value) => handleInputChange('name', value)}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Enter product price"
+        value={product.price}
+        onChangeText={(value) => handleInputChange('price', value)}
+        keyboardType="numeric"
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Enter product rating"
+        value={product.rating}
+        onChangeText={(value) => handleInputChange('rating', value)}
+        keyboardType="numeric"
+        style={styles.input}
+      />
+      <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+        <Text style={styles.imagePickerText}>Pick Product Image</Text>
+      </TouchableOpacity>
+      {product.productImage && (
+        <Image source={{ uri: product.productImage.uri }} style={styles.imagePreview} />
+      )}
+      <Button title="Add Product" onPress={handleAddProduct} color="#007bff" />
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff'
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center'
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5
+  },
+  imagePicker: {
+    backgroundColor: "#007bff",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  imagePickerText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  imagePreview: {
+    width: 100,
+    height: 100,
+    alignSelf: "center",
+    marginBottom: 10,
+  },
+});
 
 export default AddProduct;

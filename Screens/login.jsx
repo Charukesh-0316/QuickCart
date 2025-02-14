@@ -52,7 +52,7 @@ function Login(props) {
             console.log(result.data)
             debugger;
             if(result.data.data === "Customer"){
-                props.navigation.navigate("go-category");
+                props.navigation.navigate("go-categories");
             }else if(result.data.data === "Vendor"){
                 props.navigation.navigate("go-vendorCategories");
             }

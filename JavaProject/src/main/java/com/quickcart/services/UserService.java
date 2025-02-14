@@ -39,5 +39,7 @@ public interface UserService {
 
 	Review addReview(ReviewDTO reviewDTO);
 
+	List<Address> getAddressByUserId(int id);
+
 
 }

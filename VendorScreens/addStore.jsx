@@ -3,6 +3,7 @@ import axios from 'axios';
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Text } from 'react-native';
 import Toast from 'react-native-toast-message';
+import config from '../config';
 
 function AddStore(props) {
     const [store, setStore] = useState({
@@ -23,8 +24,12 @@ function AddStore(props) {
             addressid:addressId,
             name : store.name
         }
-        axios.post("http://localhost:8080/vendor/store",payload)
-        .then(async(result)=>{
+        console.log(payload)
+        const url = `${config.URL}/vendor/store`
+        console.log(url.toString)
+        axios.post(`${config.URL}/vendor/store`,payload)
+        .then((result)=>{
+            console.log(result.data.status)
             if(result.data.status === 'success'){
                 Toast.show({
                     type: "success",

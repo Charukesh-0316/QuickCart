@@ -3,6 +3,7 @@ import { View, Switch } from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
 import axios from "axios";
 import Toast from "react-native-toast-message";
+import config from "../config";
 
 function Register(props) {
   const [firstName, setfirstName] = useState("");
@@ -38,7 +39,7 @@ function Register(props) {
     };
 
     axios
-      .post("http://localhost:8080/user/register", userDetails)
+      .post(`${config.URL}/user/register`, userDetails)
       .then((response) => {
         debugger;
         if (response.data.status === "success" && userDetails.role_Id === 2) {

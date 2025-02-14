@@ -19,6 +19,15 @@ import Dashboard from "./VendorScreens/dashboard";
 import ProductStock from "./VendorScreens/productStock";
 import ProductReviews from "./VendorScreens/ProductReview";
 import AddStock from "./VendorScreens/addStock";
+import CategoriesScreen from "./Screens/categories";
+// import { Toast } from "react-native-toast-message";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import ProductsScreen from "./Screens/products";
+import ProductDetails from "./Screens/productdetails";
+import Address from "./Screens/address";
+import Cart from "./Screens/cart";
+import OrderPage from "./Screens/order";
+import PlaceOrder from "./Screens/placeOrder";
 
 
 function App() {
@@ -32,8 +41,14 @@ function App() {
     
     <Stack.Screen name="go-login" component={Login}/>
     <Stack.Screen name="go-register" component={Register}/>
-    <Stack.Screen name="go-category" component={Category}/>
-    <Stack.Screen name="go-products" component={Products}/>
+    <Stack.Screen name="go-categories" component={CategoriesScreen}/>
+    <Stack.Screen name="go-products" component={ProductsScreen}/>
+    <Stack.Screen name="go-productdetails" component={ProductDetails}/>
+    <Stack.Screen name="go-address" component={Address}/>
+    <Stack.Screen name="go-cart" component={Cart}/>
+    <Stack.Screen name="go-order" component={OrderPage}/>
+    <Stack.Screen name="go-placeOrder" component={PlaceOrder}/>
+
 
     {/* Vendor Screen */}
     <Stack.Screen name="go-vendorCategories" component={VendorCategory}/>
@@ -46,8 +61,9 @@ function App() {
     <Stack.Screen name="go-categoryProducts" component={CategoryProducts}/>
     <Stack.Screen name="go-dashboard" component={Dashboard}/>
     <Stack.Screen name="go-productStock" component={ProductStock}/>
-    <Stack.Screen name="go-reviewProduct" component={ProductReviews}/>
+    {/* <Stack.Screen name="go-reviewProduct" component={ProductReviews}/> */}
     <Stack.Screen name="go-addStock" component={AddStock}/>
+    <Stack.Screen name="go-productReview" component={ProductReviews}/>
     </Stack.Navigator>
     
 <Toast ref={(ref) => Toast.setRef(ref)} />

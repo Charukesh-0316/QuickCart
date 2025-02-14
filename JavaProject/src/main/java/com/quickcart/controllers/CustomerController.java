@@ -128,8 +128,18 @@ public class CustomerController {
 		return ShopResult.error("failed to add Review");
 		
 	}
-
 	
+	@GetMapping("/user/address/{id}")
+	public ShopResult<?> getAddressByUserId(@PathVariable("id")int id){
+		System.out.println("address" + id);
+		List<Address> addresses = userService.getAddressByUserId(id);
+//		addresses.get(0);
+		if(!addresses.isEmpty()) {
+			return ShopResult.success(addresses);
+		}
+		return ShopResult.error(null);
+	}
+
 	
 
 }

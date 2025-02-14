@@ -24,13 +24,22 @@ public class OrderController {
 		Order order = orderService.getOrderByUserId(id);
 		return ShopResult.success(order);
 	}
+	
+//	@PostMapping("/user/order")
+//	public ShopResult<?> userOrders(@RequestBody UserOrdersDTO userOrdersDTO){
+//		Order order = orderService.getOrder(userOrdersDTO);
+//		if(order != null) {
+//			return ShopResult.success(order);
+//		}
+//		return ShopResult.error("order not found....");
+//	}
 
-	@PostMapping("/placeOrder")
-	public ShopResult<?> placeOrder(@RequestBody UserOrdersDTO orderDTO){
-		Order pOrder = orderService.placeOrder(orderDTO);
-		if(pOrder!=null)
-			return ShopResult.success(pOrder);
-		return ShopResult.error(null);
-		
-	}
+//	@PostMapping("/placeOrder")
+//	public ShopResult<?> placeOrder(@RequestBody UserOrdersDTO orderDTO){
+//		Order pOrder = orderService.placeOrder(orderDTO);
+//		if(pOrder!=null)
+//			return ShopResult.success(pOrder);
+//		return ShopResult.error(null);
+//		
+//	}
 }

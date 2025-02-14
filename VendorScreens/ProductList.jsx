@@ -8,7 +8,7 @@ function ProductList(props) {
     useEffect(() => {
         const getProducts = async () => {
             const userId = await AsyncStorage.getItem('userId');
-            axios.get(`http://localhost:8080/vendor/get_products/${userId}`)
+            axios.get(`${config.URL}/vendor/get_products/${userId}`)
                 .then((result) => {
                     if (result.data.status === 'success') {
                         setProducts(result.data.data);
@@ -25,7 +25,7 @@ function ProductList(props) {
         const userId = await AsyncStorage.getItem('userId');
         axios({
             method: 'delete',
-            url: 'http://localhost:8080/vendor/deleteProduct',
+            url: '${config.URL}/vendor/deleteProduct',
             data: { vendorId: userId, productId: id, categoryId: categoryId },
             headers: {
                 'Content-Type': 'application/json'

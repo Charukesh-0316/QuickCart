@@ -1,58 +1,81 @@
-import axios from 'axios';
 import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import axios from 'axios';
+import config from '../config'; // Make sure to import the config properly
 
 function AddCategory(props) {
     const [categoryName, setCategoryName] = useState("");
-    const handleAddCategory = () => {
+
+    const handleAddCategory = async () => {
         console.log("Category Added: ", categoryName);
         const categoryData = {
-            id:0,
-            name:categoryName
-        }
-        axios.post("http://localhost:8080/vendor/add_category",categoryData)
-        .then((result)=>{
-            if(result.data.status === "success"){
-                alert("Category Added Successfully")
-                props.navigation.navigate("go-vendorCategories")
-            }else{
-                alert("Failed to Add Category")
+            id: 0,
+            name: categoryName
+        };
+        try {
+            const result = await axios.post(`${config.URL}/vendor/add_category`, categoryData);
+            if (result.data.status === "success") {
+                Alert.alert("Success", "Category Added Successfully");
+                props.navigation.navigate("go-vendorCategories");
+            } else {
+                Alert.alert("Error", "Failed to Add Category");
             }
-        })
+        } catch (error) {
+            console.error("Error adding category:", error);
+            Alert.alert("Error", "Failed to Add Category");
+        }
     };
 
     return (
-        <div style={{ padding: "20px", backgroundColor: "#f5f5f5", borderRadius: "8px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}>
-            <h2 style={{ marginBottom: "20px", color: "#333" }}>Add Category</h2>
-            <input 
-                type="text" 
-                value={categoryName} 
-                onChange={(e) => setCategoryName(e.target.value)} 
-                placeholder="Enter category name" 
-                style={{
-                    padding: "10px",
-                    width: "100%",
-                    marginBottom: "20px",
-                    borderRadius: "4px",
-                    border: "1px solid #ddd",
-                    fontSize: "16px"
-                }}
+        <View style={styles.container}>
+            <Text style={styles.title}>Add Category</Text>
+            <TextInput
+                value={categoryName}
+                onChangeText={setCategoryName}
+                placeholder="Enter category name"
+                style={styles.input}
             />
-            <button 
-                onClick={handleAddCategory} 
-                style={{
-                    padding: "10px 20px",
-                    border: "none",
-                    borderRadius: "4px",
-                    backgroundColor: "#007bff",
-                    color: "#fff",
-                    fontSize: "16px",
-                    cursor: "pointer"
-                }}
-            >
-                Add Category
-            </button>
-        </div>
+            <TouchableOpacity onPress={handleAddCategory} style={styles.button}>
+                <Text style={styles.buttonText}>Add Category</Text>
+            </TouchableOpacity>
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        padding: 20,
+        backgroundColor: "#f5f5f5",
+        borderRadius: 8,
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        alignItems: 'center'
+    },
+    title: {
+        marginBottom: 20,
+        color: "#333",
+        fontSize: 24,
+        fontWeight: 'bold'
+    },
+    input: {
+        padding: 10,
+        width: "100%",
+        marginBottom: 20,
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: "#ddd",
+        fontSize: 16
+    },
+    button: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 4,
+        backgroundColor: "#007bff",
+    },
+    buttonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "bold"
+    }
+});
 
 export default AddCategory;
