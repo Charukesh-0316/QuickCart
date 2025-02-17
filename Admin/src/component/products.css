@@ -1,0 +1,34 @@
+.products-container {
+    background-color: #ecf0f1;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.products-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.product-item {
+    background-color: #fff;
+    padding: 15px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.product-item h3 {
+    margin: 0 0 10px 0;
+}
+
+.product-item p {
+    margin: 5px 0;
+}
+
+.product-image {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+}

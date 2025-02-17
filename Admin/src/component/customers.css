@@ -1,0 +1,65 @@
+.customers-container, .all-customers-container {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.customers-list, .vendors-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.customer-item, .vendor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.customer-item h3, .vendor-item h3 {
+    margin: 0 0 5px;
+    font-size: 18px;
+    color: #333;
+}
+
+.customer-item p, .vendor-item p {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.radio-buttons {
+    margin: 20px 0;
+}
+
+.radio-buttons label {
+    margin-right: 15px;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Add styles for buttons */
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.button-group button {
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.button-group button:hover {
+    background-color: #0056b3;
+}
