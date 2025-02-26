@@ -44,7 +44,7 @@ function VendorCategory({ navigation }) {
 
   const categoryClicked = (id) => {
     console.log(id);
-    navigation.navigate("go-categoryProducts", { id });
+    navigation.navigate("go-storeCategoryProducts", { id });
   };
 
   const addCategory = () => {

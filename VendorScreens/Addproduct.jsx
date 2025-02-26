@@ -167,7 +167,7 @@ function AddProduct(props) {
       }));
       formData.append("categoryId", categoryId);
       formData.append("vendorId", userId);
-
+debugger;
       if (product.productImage) {
 
         formData.append("productImage", JSON.stringify({

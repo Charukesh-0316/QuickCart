@@ -28,6 +28,8 @@ import Address from "./Screens/address";
 import Cart from "./Screens/cart";
 import OrderPage from "./Screens/order";
 import PlaceOrder from "./Screens/placeOrder";
+import CategoryProductsCopy from "./VendorScreens/storeCategoryProducts";
+import StoreCategoryProducts from "./VendorScreens/storeCategoryProducts";
 
 
 function App() {
@@ -58,7 +60,8 @@ function App() {
     <Stack.Screen name="go-addAddress" component={AddAddress}/>
     <Stack.Screen name="go-addStore" component={AddStore}/>
     <Stack.Screen name="go-editProduct" component={EditProduct}/>
-    <Stack.Screen name="go-categoryProducts" component={CategoryProducts}/>
+    {/* <Stack.Screen name="go-categoryProducts" component={CategoryProducts}/> */}
+    <Stack.Screen name="go-storeCategoryProducts" component={StoreCategoryProducts}/>
     <Stack.Screen name="go-dashboard" component={Dashboard}/>
     <Stack.Screen name="go-productStock" component={ProductStock}/>
     {/* <Stack.Screen name="go-reviewProduct" component={ProductReviews}/> */}

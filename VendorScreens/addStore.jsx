@@ -15,6 +15,7 @@ function AddStore(props) {
     };
 
     const handleSubmit = async() => {
+        debugger;
         console.log('Store Submitted: ', store);
         debugger;
         const userId = await AsyncStorage.getItem('userId');

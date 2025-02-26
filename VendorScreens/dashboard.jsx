@@ -40,6 +40,7 @@ const Dashboard = (props) => {
             {products.map((p) => (
                 <View key={p.id} style={styles.productContainer}>
                     <Image source={{ uri: p.productImage }} style={styles.productImage} />
+                    {/* <Text>{p.productImage}</Text> */}
                     <View style={styles.productInfo}>
                         <Text style={styles.productName}>{p.name}</Text>
                         <Text><Text style={styles.boldText}>Brand:</Text> {p.brand}</Text>
