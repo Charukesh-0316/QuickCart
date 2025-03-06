@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Image } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import config from "../config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -9,7 +9,7 @@ const Cart = (props) => {
   const route = useRoute();
   const { cartId } = route.params;
   const [products, setProducts] = useState([]);
-  const [quantity, setQuantity] = useState('');
+  const [quantities, setQuantities] = useState([]);
   const [addresses, setAddresses] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -19,6 +19,9 @@ const Cart = (props) => {
     axios.get(`${config.URL}/cart/products/${cartId}`)
       .then((result) => {
         if (result.data.status === 'success') {
+          debugger;
+          const quantities = result.data.data.map(item => item.quantity);
+          setQuantities(quantities);
           const productIds = result.data.data.map(item => item.cartItemId.productid);
           getProducts(productIds);
         } else {
@@ -44,7 +47,7 @@ const Cart = (props) => {
     });
   };
 
-  const handleBuyNow = async (product) => {
+  const handleBuyNow = async (product, index) => {
     const userId = await AsyncStorage.getItem('userId');
     setIsLoading(true);
     setSelectedProduct(product);
@@ -64,9 +67,30 @@ const Cart = (props) => {
     }
   };
 
+  const handleDelete = async (productId) => {
+    setIsLoading(true);
+    try {
+      const result = await axios.delete(`${config.URL}/${cartId}/items/${productId}`);
+      if (result.data.status === 'success') {
+        setProducts(products.filter(product => product.id !== productId));
+        const newQuantities = [...quantities];
+        newQuantities.splice(products.findIndex(product => product.id === productId), 1);
+        setQuantities(newQuantities);
+      } else {
+        console.error("Failed to delete product:", result.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (navigateTo && selectedProduct) {
       if (navigateTo === "go-placeOrder" && addresses.length > 0) {
+        const index = products.findIndex(product => product.id === selectedProduct.id);
+        const quantity = quantities[index];
         props.navigation.navigate('go-placeOrder', { pid: selectedProduct.id, addressId: addresses[0], quantity: quantity });
       } else if (navigateTo === "go-address") {
         props.navigation.navigate("go-address", { pid: selectedProduct.id });
@@ -78,23 +102,33 @@ const Cart = (props) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Cart {cartId}</Text>
+      <Text style={styles.header}>My Cart</Text>
       {isLoading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <FlatList 
           data={products}
           keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <View style={styles.productContainer}>
-              <Text style={styles.productName}>Product Name: {item.name}</Text>
-              <Text style={styles.productPrice}>Product Price: ${item.price}</Text>
-              <Text style={styles.productRating}>Product Rating: {item.rating}</Text>
+              <Image source={{ uri: `http://localhost:8080/images/${item.productImage}` }} style={styles.productImage} />
+              <View style={styles.productDetails}>
+                <Text style={styles.productName}>Product Name: {item.name}</Text>
+                <Text style={styles.productPrice}>Product Price: ${item.price}</Text>
+                <Text style={styles.productRating}>Product Rating: {item.rating}</Text>
+                <Text style={styles.productQuantity}>Product Quantity: {quantities[index]}</Text>
+              </View>
               <TouchableOpacity 
                 style={styles.buyButton} 
-                onPress={() => handleBuyNow(item)} 
+                onPress={() => handleBuyNow(item, index)} 
               >
                 <Text style={styles.buyButtonText}>Buy Now</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.deleteButton} 
+                onPress={() => handleDelete(item.id)} 
+              >
+                <Text style={styles.deleteButtonText}>Delete</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -107,7 +141,7 @@ const Cart = (props) => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#f8f9fa", // Light gray background, Bootstrap-like
+    backgroundColor: "#f8f9fa", // Light gray background
   },
   header: {
     fontSize: 24,
@@ -116,8 +150,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   productContainer: {
+    flexDirection: "row",
     backgroundColor: "#fff", 
-    padding: 15,
+    padding: 10,
     marginBottom: 15,
     borderRadius: 8,
     borderWidth: 1,
@@ -126,31 +161,58 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     elevation: 2,
+    alignItems: "center",
+  },
+  productImage: {
+    width: 50,
+    height: 50,
+    marginRight: 10,
+    borderRadius: 4,
+  },
+  productDetails: {
+    flex: 1,
   },
   productName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#007bff", // Bootstrap primary color
   },
   productPrice: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#28a745", // Green for price
   },
   productRating: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#ffc107", // Yellow for rating
+  },
+  productQuantity: {
+    fontSize: 14,
+    color: "#17a2b8", // Info color for quantity
   },
   buyButton: {
     backgroundColor: "#007bff", 
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
     borderRadius: 5,
     alignItems: "center",
-    marginTop: 10,
+    marginLeft: 5,
   },
   buyButtonText: {
     color: "#fff", 
-    fontSize: 16,
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  deleteButton: {
+    backgroundColor: "#dc3545", // Bootstrap danger color
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    alignItems: "center",
+    marginLeft: 5,
+  },
+  deleteButtonText: {
+    color: "#fff", 
+    fontSize: 12,
     fontWeight: "bold",
   },
 });

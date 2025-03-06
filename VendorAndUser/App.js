@@ -30,6 +30,7 @@ import OrderPage from "./Screens/order";
 import PlaceOrder from "./Screens/placeOrder";
 import CategoryProductsCopy from "./VendorScreens/storeCategoryProducts";
 import StoreCategoryProducts from "./VendorScreens/storeCategoryProducts";
+import OrderDetails from "./Screens/orderDetails";
 
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
     <Stack.Screen name="go-cart" component={Cart}/>
     <Stack.Screen name="go-order" component={OrderPage}/>
     <Stack.Screen name="go-placeOrder" component={PlaceOrder}/>
+    <Stack.Screen name="go-orderDetails" component={OrderDetails}/>
 
 
     {/* Vendor Screen */}
