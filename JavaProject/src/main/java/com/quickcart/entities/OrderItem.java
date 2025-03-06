@@ -1,5 +1,7 @@
 package com.quickcart.entities;
 
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
@@ -20,26 +22,23 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name="orderitems")
-@IdClass(OrderItemId.class) // Composite Key Class
+//@IdClass(OrderItemId.class) // Composite Key Class
 public class OrderItem {
-	
-	@Id
-	private OrderItemId orderItemId;
-	
-    @Id
+    
+    @EmbeddedId
+    private OrderItemId orderItemId;
+    
     @ManyToOne
-    @JoinColumn(name = "orderid")
+    @JoinColumn(name = "orderid", insertable = false, updatable = false)
     private Order order;
 
-    @Id
     @ManyToOne
-    @JoinColumn(name = "productid")
+    @JoinColumn(name = "productid", insertable = false, updatable = false)
     private Product product;
 
     private int quantity;
+    @Column(name = "currentprice")
     private double currentPrice;
 
     // Getters and Setters
 }
-
-

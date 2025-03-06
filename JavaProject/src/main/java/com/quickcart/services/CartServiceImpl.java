@@ -42,16 +42,19 @@ public class CartServiceImpl implements CartServices{
 
 	@Override
 	public Cart addCart(Cart cart) {
+		 Optional<Cart> c = cartDao.findById(cart.getId());
+		 if(c.isPresent()) {
+			 return c.get();
+		 }
 	 	Cart savedCart = cartDao.save(cart);
 		return savedCart;
 	}
 
 	@Override
-	public Cart getCartById(int cartId) {
-		Optional<Cart> cart= cartDao.findById(cartId);
-		if(cart.isPresent()) {
-			Cart c = cart.get();
-			return c;
+	public Cart getCartById(int userId) {
+		List<Cart> carts= cartDao.findCartByUserId(userId);
+		if(!carts.isEmpty()) {
+			return carts.get(0);
 		}
 		return null;
 	}
@@ -74,13 +77,14 @@ public class CartServiceImpl implements CartServices{
 
 	@Override
 	public Cart getCartByUserId(int id) {
-		// TODO Auto-generated method stub
-		return null;
+		 Cart c = cartDao.findByUserId(id);
+		return c;
+	}
+	@Override
+	public String deleteCartItem(int cartId, int productId) {
+		CartItemId itemId = new CartItemId(cartId, productId);
+		cartItemDao.deleteById(itemId);
+		return "product Deleted Successfully";
 	}
 
-	@Override
-	public List<CartItem> getCartItemsByCartId(int id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

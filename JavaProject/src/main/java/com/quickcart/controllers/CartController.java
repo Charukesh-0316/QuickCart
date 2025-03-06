@@ -33,6 +33,7 @@ public class CartController {
 	@GetMapping("/user/cart/{id}")
 	public ShopResult<?> getCart(@PathVariable("id") int id){
 		 Cart cart = cartServices.getCartById(id);
+		 System.out.println(cart);
 		if(cart!=null) {
 			return ShopResult.success(cart);
 		}
@@ -71,27 +72,10 @@ public class CartController {
 	  
 
 	}
-	@DeleteMapping("/{cardId}/items/{productId}")
-	public ShopResult<Cart> removeItemToCart(@PathVariable int cartId,@PathVariable int productId){
-		boolean itemRemoved = false;
-		Cart cart = cartServices.getCartById(cartId);
-
-		 Iterator<CartItem> iterator =cart.getItems().iterator();
-		 
-		 while(iterator.hasNext()) {
-			 CartItem cartItem = iterator.next();
-			 if(cartItem.getProduct().getId() == productId) {
-				 iterator.remove();
-				 
-				 cart.setTotalItems(cart.getTotalItems() - cartItem.getQuantity());
-				 itemRemoved = true;
-				 break;
-			 }
-		 }
-		 
-		 Cart updatedCart = cartServices.addCart(cart);
-		 
-		return ShopResult.success(updatedCart);
+	@DeleteMapping("/{cartId}/items/{productId}")
+	public ShopResult<?> removeItemToCart(@PathVariable("cartId") int cartId,@PathVariable("productId") int productId){
+		String result = cartServices.deleteCartItem(cartId,productId);
+		return ShopResult.success(result);
 	}
 	@PutMapping("/{cartId}/items/{productId}")
 	public ShopResult<Cart> updateItemToCart(@RequestBody CartItemDTO cartIdDto){

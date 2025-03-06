@@ -1,5 +1,7 @@
 package com.quickcart.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +23,7 @@ public class OrderController {
 	
 	@GetMapping("/getOrderBy/{user_id}")
 	public ShopResult<?> getOrderByUserId(@PathVariable("user_id")int id){
-		Order order = orderService.getOrderByUserId(id);
+		List<Order> order = orderService.getOrderByUserId(id);
 		return ShopResult.success(order);
 	}
 	

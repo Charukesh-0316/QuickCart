@@ -1,5 +1,7 @@
 package com.quickcart.services;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +38,8 @@ public class OrderServiceImpl implements OrderService {
 	private OrderItemDao orderItemDao;
 
 	@Override
-	public Order getOrderByUserId(int id) {
-		Order order=orderDao.findByUserId(id);
+	public List<Order> getOrderByUserId(int id) {
+		List<Order> order=orderDao.findByUserId(id);
 		if(order!=null)
 			return order;
 		return null;

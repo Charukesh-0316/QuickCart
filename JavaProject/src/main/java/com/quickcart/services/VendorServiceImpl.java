@@ -289,14 +289,22 @@ public class VendorServiceImpl implements VendorService{
 
 	@Override
 	public Store getStoreByUserId(int id) {
+		System.out.println("vendor id: " + id);
 		 List<Store> store = storeDao.findStoresByUserId(id);
 		 System.out.println(store + "service");
-		return store.get(0);
+		 if(store.isEmpty())
+			 return null;
+		 Store existingStore = store.get(0);
+		 System.out.println("Existing store " + existingStore);
+		return existingStore;
 	}
 
 	@Override
-	public List<Product> getProductsByCategoryIdAndVendorId(int cid, int vid) {
+	public List<Product> getProductsByCategoryIdAndVendorId(int storeId, int categoryId) {
 		
+		List<Product> products = storeProductsDao.findProductsByStoreIdAndCategoryId(storeId, categoryId);
+		if(products!=null)
+			return products;
 		return null;
 	}
 	
@@ -349,6 +357,8 @@ public class VendorServiceImpl implements VendorService{
 	
 	@Override
 	public Product editProduct(int id, ProductEditUploadDTO editUploadDTO) throws Throwable {
+		System.out.println(editUploadDTO);
+		// Parse the JSON string into a Product object
 		ObjectMapper objectMapper = new ObjectMapper();
 		Product product = objectMapper.readValue(editUploadDTO.getProductJson(), Product.class);
 

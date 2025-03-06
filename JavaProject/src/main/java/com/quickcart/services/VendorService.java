@@ -57,7 +57,7 @@ public interface VendorService {
 	
 	Product editProduct(int id,ProductEditUploadDTO editUploadDTO) throws Throwable;
 
-	List<Product> getProductsByCategoryIdAndVendorId(int cid, int vid);
+	List<Product> getProductsByCategoryIdAndVendorId(int storeId, int categoryId);
 
 //	Product updateProduct(int id, Product product, String productImage) throws IOException;
 }

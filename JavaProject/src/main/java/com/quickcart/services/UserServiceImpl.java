@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.quickcart.DTO.ReviewDTO;
@@ -98,10 +99,16 @@ public class UserServiceImpl implements UserService {
 		return list;
 	}
 
+	@Value("${images.url}")
+    private String imageUrl;
 	@Override
 	public List<Product> getAllProductByCategory(int id) {
-		List<Product> list = productCategoryDao.findProductsByCategoryId(id);
-		return list;
+		 List<Product> products = productCategoryDao.findProductsByCategoryId(id);
+	        for (Product product : products) {
+	        	System.out.println(imageUrl + product.getProductImage());
+	            product.setProductImage(imageUrl + product.getProductImage());
+	        }
+	        return products;
 	}
 
 	@Override
@@ -157,8 +164,9 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Product getProductDetails(int id) {
-		Product product = dao.getById(id);
-		return product;
+		 Optional<Product> product = dao.findById(id);
+		 System.out.println(product.get().getProductImage());
+		return product.get();
 	}
 
 //	@Override
@@ -252,20 +260,17 @@ public class UserServiceImpl implements UserService {
 	    Order savedOrder = orderDao.save(order);
 
 	    // Process each product in the list
-	    for (Integer productId : userOrdersDTO.getProductId()) {
-	        Product product = productDao.findById(productId)
-	                .orElseThrow(() -> new RuntimeException("Product not found: " + productId));
+	  
 
 	        OrderItem orderItem = new OrderItem();
-	        OrderItemId orderItemId = new OrderItemId(savedOrder.getId(), productId);
+	        OrderItemId orderItemId = new OrderItemId(savedOrder.getId(), userOrdersDTO.getProductId());
+	         Optional<Product> product = productDao.findById(userOrdersDTO.getProductId());
 	        orderItem.setOrderItemId(orderItemId);
 	        orderItem.setOrder(savedOrder);
-	        orderItem.setProduct(product);
+	        orderItem.setProduct(product.get());
 	        orderItem.setQuantity(userOrdersDTO.getQuantity());  // Might need to handle different quantities per product
 	        orderItem.setCurrentPrice(userOrdersDTO.getCurrentPrice()); // Ensure price is handled correctly
-
 	        orderItemDao.save(orderItem);
-	    }
 
 	    return savedOrder;
 	}

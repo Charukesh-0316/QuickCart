@@ -42,7 +42,7 @@ import com.quickcart.models.StockIsAvailaibleModel;
 import com.quickcart.services.VendorService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:8081") // Allow only frontend origin
+@CrossOrigin()
 public class VendorController {
 
 	@Autowired
@@ -50,7 +50,7 @@ public class VendorController {
 
 	@GetMapping("vendor/login/{id}")
 	private ShopResult<?> vendorLogIn(@PathVariable("id") int id) {
-		System.out.println("LogIn Vendor Called");
+		System.out.println("LogIn Vendor Called" + id);
 		String role = vendorService.logIn(id);
 		if (role != null)
 			return ShopResult.success(role);
@@ -101,7 +101,6 @@ public class VendorController {
 
 	@PutMapping(value = "/vendor/editProduct/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ShopResult<?> editProduct(@PathVariable("id") int id, ProductEditUploadDTO editUploadDTO) throws Throwable {
-		// Parse the JSON string into a Product object
 		Product updatedProduct = vendorService.editProduct(id, editUploadDTO);
 				if (updatedProduct != null) {
 			System.out.println("Product updated successfully");
@@ -112,7 +111,7 @@ public class VendorController {
 	}
 
 	@DeleteMapping("/vendor/deleteProduct")
-	public ShopResult<?> deleteProduct(@RequestBody ProductCategoryModel pc) {
+	public ShopResult<?> deleteProduct(ProductCategoryModel pc) {
 		System.out.println(pc.toString());
 		String deletedProduct = vendorService.deleteProduct(pc);
 		if (deletedProduct != null)
@@ -160,7 +159,7 @@ public class VendorController {
 		List<Review> reviews = vendorService.getReviewsOfProduct(id);
 		if (!reviews.isEmpty())
 			return ShopResult.success(reviews);
-		return ShopResult.error(null);
+		return ShopResult.error("No Reviews");
 	}
 
 	@GetMapping("/vendor/products/category/{id}")
@@ -171,12 +170,12 @@ public class VendorController {
 		return ShopResult.error(null);
 	}
 
-	@GetMapping("/vendor/products/category/{categoryId}/{vendorId}")
-	public ShopResult<?> getProductsByCategoryIdAndVendorId(@PathVariable("categoryId") int cid, @PathVariable("vendorId") int vid) {
-		List<Product> products = vendorService.getProductsByCategoryIdAndVendorId(cid,vid);
+	@GetMapping("/vendor/products/category/{storeId}/{categoryId}")
+	public ShopResult<?> getProductsByCategoryIdAndVendorId(@PathVariable("storeId") int storeId, @PathVariable("categoryId") int categoryId) {
+		List<Product> products = vendorService.getProductsByCategoryIdAndVendorId(storeId,categoryId);
 		if (!products.isEmpty())
 			return ShopResult.success(products);
-		return ShopResult.error(null);
+		return ShopResult.error("No products found");
 	}
 
 	@GetMapping("vendor/store/user/{id}")

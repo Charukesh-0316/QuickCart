@@ -19,7 +19,7 @@ import lombok.ToString;
 public class UserOrdersDTO {
     private int userId;
     private int addressId;
-    private List<Integer> productId;
+    private int productId;
     private int quantity;
     private double currentPrice;
     private Order order;
